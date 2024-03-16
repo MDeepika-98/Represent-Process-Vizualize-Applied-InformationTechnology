@@ -1,0 +1,126 @@
+---
+title: "Mid term project"
+author: "Manikya Deepika Eadara"
+date: "2023-10-08"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(skimr)
+library(readxl)
+```
+
+
+```{r}
+employee_data <- read_excel("C:\\Users\\manik\\OneDrive\\Employee Data Formatted - GBUS 738 Fall 2023 (1100 Records) f.xlsx")
+head(employee_data, 10)
+```
+
+
+```{r echo=FALSE}
+#Basic Exploration 
+dim(employee_data)
+str(employee_data)
+head(employee_data)
+glimpse(employee_data)
+summary(employee_data)
+skim(employee_data)
+
+```
+```{r echo=FALSE}
+# 1.Is there a relationship between employees leaving the company and their department?
+department_summary <- employee_data %>%
+  group_by(department, left_company) %>%
+  summarise(n = n(), .groups = "drop")
+
+#Horizontal Bar Graph
+ggplot(department_summary, aes(y = department, x = n, fill = left_company)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Employee Attrition by Department",
+       y = "Department",
+       x = "Number of Employees") +
+  theme_minimal()
+
+```
+
+```{r echo=FALSE}
+# 2. Is there a relationship between employees leaving the company and their department and job level together?
+dept_job_summary <- employee_data %>%
+  group_by(department, job_level, left_company) %>%
+  summarise(n = n(), .groups = "drop")
+
+dept_job_summary <- dept_job_summary %>%
+  mutate(department = reorder(department, -n))
+
+ggplot(dept_job_summary, aes(y = department, x = n, fill = job_level)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  facet_grid(job_level ~ left_company) +
+  labs(title = "Employee Attrition by Department and Job Level",
+       y = "Department",
+       x = "Number of Employees") +
+  theme_minimal() +
+  theme(axis.text.y = element_text(size = 8))
+
+
+
+
+```
+```{r echo=FALSE}
+# 3. Is there a relationship between employees leaving the company and their years at the company?
+ggplot(employee_data, aes(x = yrs_at_company, fill = left_company)) +
+  geom_histogram(binwidth = 1, position = "identity", alpha = 0.5) +
+  labs(title = "Employee Attrition by Years at Company",
+       x = "Years at Company",
+       y = "Number of Employees")
+```
+```{r echo=FALSE}
+# 4. Does business travel frequency affect employee attrition?
+business_travel_summary <- employee_data %>%
+  group_by(business_travel, left_company) %>%
+  summarise(n = n(), .groups = "drop")
+
+ggplot(business_travel_summary, aes(x = business_travel, y = n, fill = left_company)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Employee Attrition by Business Travel Frequency",
+       x = "Business Travel Frequency",
+       y = "Number of Employees")
+```
+```{r echo=FALSE}
+# 5.Does the distance from home affect employee attrition?
+ggplot(employee_data, aes(x = miles_from_home, fill = left_company)) +
+  geom_histogram(binwidth = 5, position = "identity", alpha = 0.5) +
+  labs(title = "Employee Attrition by Miles from Home",
+       x = "Miles from Home",
+       y = "Number of Employees")
+
+```
+```{r echo=FALSE}
+# 6.Does the distribution of salaries differ between employees who left and those who stayed?
+# Box plot for salaries based on whether an employee left the company or not
+ggplot(employee_data, aes(x = left_company, y = salary, fill = left_company)) +
+  geom_boxplot() +
+  labs(title = "Distribution of Salaries by Attrition Status",
+       x = "Left the Company",
+       y = "Salary") +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+```
+```{r echo=FALSE}
+# 7. Is there a relationship between an employee's performance rating and their decision to leave the company?
+performance_rating_summary <- employee_data %>%
+  group_by(performance_rating, left_company) %>%
+  summarise(n = n(), .groups = "drop")
+
+ggplot(performance_rating_summary, aes(x = performance_rating, y = n, fill = left_company)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Employee Attrition by Performance Rating",
+       x = "Performance Rating",
+       y = "Number of Employees") +
+  theme_minimal()
+```
